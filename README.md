@@ -53,14 +53,8 @@ bun run package    # zip for installing or signing → web-ext-artifacts/
 For a quick try, open `about:debugging#/runtime/this-firefox`, click **Load
 Temporary Add-on…** and pick `dist/manifest.json`. Temporary add-ons are removed
 when Firefox restarts. To install permanently on release Firefox it must be
-signed; self-distributed ("unlisted") signing is automatic:
-
-```sh
-bunx web-ext sign --source-dir dist --channel unlisted \
-  --api-key "$AMO_JWT_ISSUER" --api-secret "$AMO_JWT_SECRET"
-```
-
-(API credentials come from <https://addons.mozilla.org/developers/addon/api/key/>.)
+signed: use the signed `.xpi` attached to each
+[GitHub release](https://github.com/typedrat/send-to-qui-firefox/releases).
 
 ## The download helper
 
@@ -147,7 +141,7 @@ extension sees the new values.
 **Signing:** the package is built from source and unsigned. Zen and Firefox
 Developer Edition, Nightly and ESR load it once `xpinstall.signatures.required` is
 `false`; release Firefox refuses unsigned extensions regardless, so it needs a
-signed build (see *Building*).
+signed build from the [releases](https://github.com/typedrat/send-to-qui-firefox/releases).
 
 When `bun.lock` changes, update the `outputHash` in `nix/node-modules.nix`.
 
@@ -164,6 +158,24 @@ bun run lint        # web-ext lint on dist/
 `bun test` also runs a live suite against a real qui when `QUI_URL` and
 `QUI_API_KEY` are set; it adds two paused test torrents to the first instance
 (or `QUI_INSTANCE_ID`).
+
+## Releasing
+
+The version lives in `package.json`; the build copies it into the extension's
+manifest. To cut a release from a clean `main`:
+
+```sh
+bun run release patch           # or minor, major, or an explicit x.y.z
+git push --atomic origin main v1.2.3
+```
+
+`bun run release` commits the bump and creates the tag. Pushing the tag runs the
+release workflow, which builds the extension with Nix, has addons.mozilla.org sign
+it as a self-distributed ("unlisted") add-on, and publishes the signed `.xpi` as a
+GitHub release. Signing needs two repository secrets, `AMO_JWT_ISSUER` and
+`AMO_JWT_SECRET`, from <https://addons.mozilla.org/developers/addon/api/key/>.
+Mozilla's automated review usually takes a few minutes; the workflow waits up to
+30.
 
 ## CI
 
