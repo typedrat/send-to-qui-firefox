@@ -2,25 +2,24 @@
 
 concurrency:
   cancel-in-progress: false
-  group: release-${{ github.ref }}
+  group: release
 jobs:
-  release:
-    name: Sign and publish
+  publish:
+    env:
+      TAG: ${{ needs.release-please.outputs.tag_name }}
+      XPI: send-to-qui-${{ needs.release-please.outputs.version }}.xpi
+    if: needs.release-please.outputs.release_created == 'true'
+    name: Sign and attach the extension
+    needs:
+      - release-please
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
       - name: Install Nix
         uses: DeterminateSystems/determinate-nix-action@v3
-      - id: version
-        name: Check the tag matches package.json
-        run: |
-          version=$(jq -r .version package.json)
-          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
-            echo "::error::Tag $GITHUB_REF_NAME doesn't match package.json version $version"
-            exit 1
-          fi
-          echo "version=$version" >> "$GITHUB_OUTPUT"
       - name: Build
         run: nix build .#send-to-qui --print-build-logs
       - name: Install web-ext
@@ -39,21 +38,27 @@ jobs:
             --upload-source-code source.zip \
             --artifacts-dir signed \
             --approval-timeout 1800000
-          mv signed/*.xpi "send-to-qui-${{ steps.version.outputs.version }}.xpi"
+          mv signed/*.xpi "$XPI"
       - env:
           GH_TOKEN: ${{ github.token }}
-        name: Publish the GitHub release
-        run: |
-          gh release create "$GITHUB_REF_NAME" \
-            "send-to-qui-${{ steps.version.outputs.version }}.xpi" \
-            --title "$GITHUB_REF_NAME" \
-            --generate-notes \
-            --verify-tag
+        name: Attach to the GitHub release
+        run: gh release upload "$TAG" "$XPI" --clobber
     timeout-minutes: 60
+  release-please:
+    name: Update the release PR
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@v5
 name: Release
 "on":
   push:
-    tags:
-      - v[0-9]+.[0-9]+.[0-9]+*
+    branches:
+      - main
 permissions:
   contents: write
+  pull-requests: write

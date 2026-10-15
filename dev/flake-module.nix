@@ -131,77 +131,90 @@
         release = {
           name = "Release";
 
-          on.push.tags = ["v[0-9]+.[0-9]+.[0-9]+*"];
+          # release-please keeps a release PR up to date with the version bump and changelog
+          # from the conventional commits on main; merging it creates the tag and the GitHub
+          # release. Tags it creates with the workflow token don't trigger other workflows,
+          # so the signed .xpi is built and attached here.
+          on.push.branches = ["main"];
 
-          # Two runs for the same tag would both try to sign the same version.
+          # Two runs at once could both try to sign the same version.
           concurrency = {
-            group = "release-\${{ github.ref }}";
+            group = "release";
             cancelInProgress = false;
           };
 
-          permissions.contents = "write";
+          permissions = {
+            contents = "write";
+            pull-requests = "write";
+          };
 
-          jobs.release = {
-            name = "Sign and publish";
-            runsOn = "ubuntu-latest";
-            timeoutMinutes = 60;
-            steps = [
-              checkout
-              installNix
-              {
-                id = "version";
-                name = "Check the tag matches package.json";
-                run = ''
-                  version=$(jq -r .version package.json)
-                  if [ "v$version" != "$GITHUB_REF_NAME" ]; then
-                    echo "::error::Tag $GITHUB_REF_NAME doesn't match package.json version $version"
-                    exit 1
-                  fi
-                  echo "version=$version" >> "$GITHUB_OUTPUT"
-                '';
-              }
-              {
-                name = "Build";
-                run = "nix build .#send-to-qui --print-build-logs";
-              }
-              {
-                name = "Install web-ext";
-                run = "nix develop --command bun install --frozen-lockfile";
-              }
-              {
-                # Signing the Nix-built files keeps the release identical to the package, apart
-                # from Mozilla's signature. AMO asks for the source of bundled code, so the
-                # tagged tree goes along with it.
-                name = "Sign with addons.mozilla.org";
-                env = {
-                  WEB_EXT_API_KEY = "\${{ secrets.AMO_JWT_ISSUER }}";
-                  WEB_EXT_API_SECRET = "\${{ secrets.AMO_JWT_SECRET }}";
-                };
-                run = ''
-                  mkdir unpacked
-                  unzip -q '${xpiPath}' -d unpacked
-                  git archive --format=zip --output=source.zip HEAD
-                  nix develop --command node_modules/.bin/web-ext sign \
-                    --source-dir unpacked \
-                    --channel unlisted \
-                    --upload-source-code source.zip \
-                    --artifacts-dir signed \
-                    --approval-timeout 1800000
-                  mv signed/*.xpi "send-to-qui-''${{ steps.version.outputs.version }}.xpi"
-                '';
-              }
-              {
-                name = "Publish the GitHub release";
-                env.GH_TOKEN = "\${{ github.token }}";
-                run = ''
-                  gh release create "$GITHUB_REF_NAME" \
-                    "send-to-qui-''${{ steps.version.outputs.version }}.xpi" \
-                    --title "$GITHUB_REF_NAME" \
-                    --generate-notes \
-                    --verify-tag
-                '';
-              }
-            ];
+          jobs = {
+            release-please = {
+              name = "Update the release PR";
+              runsOn = "ubuntu-latest";
+              outputs = {
+                release_created = "\${{ steps.release.outputs.release_created }}";
+                tag_name = "\${{ steps.release.outputs.tag_name }}";
+                version = "\${{ steps.release.outputs.version }}";
+              };
+              steps = [
+                {
+                  id = "release";
+                  uses = "googleapis/release-please-action@v5";
+                }
+              ];
+            };
+
+            publish = {
+              name = "Sign and attach the extension";
+              needs = ["release-please"];
+              if_ = "needs.release-please.outputs.release_created == 'true'";
+              runsOn = "ubuntu-latest";
+              timeoutMinutes = 60;
+              env = {
+                TAG = "\${{ needs.release-please.outputs.tag_name }}";
+                XPI = "send-to-qui-\${{ needs.release-please.outputs.version }}.xpi";
+              };
+              steps = [
+                (checkout // {with_.ref = "\${{ needs.release-please.outputs.tag_name }}";})
+                installNix
+                {
+                  name = "Build";
+                  run = "nix build .#send-to-qui --print-build-logs";
+                }
+                {
+                  name = "Install web-ext";
+                  run = "nix develop --command bun install --frozen-lockfile";
+                }
+                {
+                  # Signing the Nix-built files keeps the release identical to the package, apart
+                  # from Mozilla's signature. AMO asks for the source of bundled code, so the
+                  # tagged tree goes along with it.
+                  name = "Sign with addons.mozilla.org";
+                  env = {
+                    WEB_EXT_API_KEY = "\${{ secrets.AMO_JWT_ISSUER }}";
+                    WEB_EXT_API_SECRET = "\${{ secrets.AMO_JWT_SECRET }}";
+                  };
+                  run = ''
+                    mkdir unpacked
+                    unzip -q '${xpiPath}' -d unpacked
+                    git archive --format=zip --output=source.zip HEAD
+                    nix develop --command node_modules/.bin/web-ext sign \
+                      --source-dir unpacked \
+                      --channel unlisted \
+                      --upload-source-code source.zip \
+                      --artifacts-dir signed \
+                      --approval-timeout 1800000
+                    mv signed/*.xpi "$XPI"
+                  '';
+                }
+                {
+                  name = "Attach to the GitHub release";
+                  env.GH_TOKEN = "\${{ github.token }}";
+                  run = "gh release upload \"$TAG\" \"$XPI\" --clobber";
+                }
+              ];
+            };
           };
         };
       };

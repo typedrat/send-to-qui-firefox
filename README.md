@@ -161,21 +161,21 @@ bun run lint        # web-ext lint on dist/
 
 ## Releasing
 
-The version lives in `package.json`; the build copies it into the extension's
-manifest. To cut a release from a clean `main`:
+Releases are managed by
+[release-please](https://github.com/googleapis/release-please) from
+[conventional commits](https://www.conventionalcommits.org/) on `main`: `fix:`
+bumps the patch version, `feat:` the minor version, and a breaking change (`feat!:`
+or a `BREAKING CHANGE:` footer) the major version. It keeps a release pull request
+open with the version bump in `package.json` (which the build copies into the
+extension's manifest) and the new `CHANGELOG.md` entries.
 
-```sh
-bun run release patch           # or minor, major, or an explicit x.y.z
-git push --atomic origin main v1.2.3
-```
-
-`bun run release` commits the bump and creates the tag. Pushing the tag runs the
-release workflow, which builds the extension with Nix, has addons.mozilla.org sign
-it as a self-distributed ("unlisted") add-on, and publishes the signed `.xpi` as a
-GitHub release. Signing needs two repository secrets, `AMO_JWT_ISSUER` and
+Merging that pull request tags the release and publishes it on GitHub. The release
+workflow then builds the extension with Nix, has addons.mozilla.org sign it as a
+self-distributed ("unlisted") add-on, and attaches the signed `.xpi` to the
+release. Signing needs two repository secrets, `AMO_JWT_ISSUER` and
 `AMO_JWT_SECRET`, from <https://addons.mozilla.org/developers/addon/api/key/>.
 Mozilla's automated review usually takes a few minutes; the workflow waits up to
-30.
+30. If signing fails, re-running the failed job retries it.
 
 ## CI
 

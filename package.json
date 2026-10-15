@@ -13,8 +13,7 @@
     "start": "bun run build && web-ext run --source-dir dist",
     "package": "bun run build && web-ext build --source-dir dist --overwrite-dest",
     "build:host": "bun build --compile --minify src/host/main.ts --outfile dist-host/send-to-qui-host",
-    "install-host": "bun run build:host && bun run scripts/install-host.ts",
-    "release": "bun run scripts/release.ts"
+    "install-host": "bun run build:host && bun run scripts/install-host.ts"
   },
   "dependencies": {
     "valibot": "1.5.0"
