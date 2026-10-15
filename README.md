@@ -164,3 +164,8 @@ bun run lint        # web-ext lint on dist/
 `bun test` also runs a live suite against a real qui when `QUI_URL` and
 `QUI_API_KEY` are set; it adds two paused test torrents to the first instance
 (or `QUI_INSTANCE_ID`).
+
+## License
+
+GPL-2.0-or-later; see [LICENSE](LICENSE). The extension's icons and the rabbit
+logo come from [qui](https://github.com/autobrr/qui), under the same license.
