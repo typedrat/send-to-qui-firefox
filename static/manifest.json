@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "Send to qui",
+  "version": "1.0.0",
+  "description": "Send .torrent files and magnet links straight to qui.",
+  "icons": {
+    "64": "icons/icon-64.png",
+    "192": "icons/icon-192.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "send-to-qui@typedr.at",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    },
+    "gecko_android": {
+      "strict_min_version": "142.0"
+    }
+  },
+  "permissions": [
+    "menus",
+    "downloads",
+    "notifications",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Send to qui settings",
+    "default_icon": {
+      "64": "icons/icon-64.png",
+      "192": "icons/icon-192.png"
+    }
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "magnet",
+      "name": "Send to qui",
+      "uriTemplate": "/magnet.html?uri=%s"
+    }
+  ],
+  "optional_permissions": [
+    "nativeMessaging"
+  ]
+}

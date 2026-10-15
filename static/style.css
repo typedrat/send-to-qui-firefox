@@ -1,0 +1,200 @@
+:root {
+  color-scheme: light dark;
+  /* Each token prefers the variable from qui's theme and falls back to a built-in palette. */
+  --ui-bg: var(--background, #f6f6f7);
+  --ui-surface: var(--card, #ffffff);
+  --ui-text: var(--foreground, #18181b);
+  --ui-muted: var(--muted-foreground, #6b6b76);
+  --ui-border: var(--border, #d9d9de);
+  --ui-input: var(--input, var(--ui-border));
+  --ui-accent: var(--primary, #3b6fd8);
+  --ui-accent-text: var(--primary-foreground, #ffffff);
+  --ui-ok: var(--primary, #1f8a4c);
+  --ui-error: var(--destructive, #c53030);
+  --ui-radius: var(--radius, 0.5rem);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ui-bg: var(--background, #111113);
+    --ui-surface: var(--card, #1b1b1f);
+    --ui-text: var(--foreground, #ececf0);
+    --ui-muted: var(--muted-foreground, #9a9aa5);
+    --ui-border: var(--border, #33333a);
+    --ui-accent: var(--primary, #6a93ec);
+    --ui-accent-text: var(--primary-foreground, #0b0b0d);
+    --ui-ok: var(--primary, #4cc283);
+    --ui-error: var(--destructive, #f07171);
+  }
+}
+
+/* A qui theme decides light or dark itself, which may differ from the OS preference. */
+:root.qui-themed {
+  color-scheme: light;
+}
+
+:root.qui-themed.dark {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--ui-bg);
+  color: var(--ui-text);
+  font-size: 15px;
+  line-height: 1.5;
+  font-family: var(--font-sans, system-ui), system-ui, sans-serif;
+}
+
+main {
+  max-width: 34rem;
+  margin: 2.5rem auto;
+  padding: 0 1rem;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+h2 {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+}
+
+form,
+.banner {
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
+  border-radius: calc(var(--ui-radius) + 4px);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.banner p {
+  margin-top: 0;
+}
+
+label {
+  display: block;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+label.check {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-weight: normal;
+}
+
+input[type="url"],
+input[type="password"],
+input[type="text"],
+select {
+  display: block;
+  width: 100%;
+  margin-top: 0.3rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--ui-input);
+  border-radius: var(--ui-radius);
+  background: var(--ui-bg);
+  color: var(--ui-text);
+  font: inherit;
+}
+
+small {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--ui-muted);
+  font-weight: normal;
+}
+
+button {
+  padding: 0.45rem 1rem;
+  border: 0;
+  border-radius: var(--ui-radius);
+  background: var(--ui-accent);
+  color: var(--ui-accent-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.status {
+  min-height: 1.5em;
+  margin: 0.75rem 0 0;
+  color: var(--ui-muted);
+}
+
+.status.ok {
+  color: var(--ui-ok);
+}
+
+.status.error {
+  color: var(--ui-error);
+}
+
+.center {
+  text-align: center;
+  margin-top: 30vh;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring, var(--ui-accent));
+  outline-offset: 2px;
+}
+
+small.error {
+  color: var(--ui-error);
+}
+
+code {
+  font-family: var(--font-mono, ui-monospace), ui-monospace, monospace;
+}
+
+main.picker {
+  margin: 1.25rem auto;
+}
+
+main.picker header {
+  margin-bottom: 1rem;
+}
+
+main.picker h1 {
+  font-size: 1.2rem;
+}
+
+.torrent-name {
+  margin: 0 0 1rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+button.secondary {
+  background: transparent;
+  color: var(--ui-text);
+  border: 1px solid var(--ui-border);
+}

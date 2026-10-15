@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Send to qui</title>
+    <link rel="icon" href="icons/icon-64.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="picker">
+      <header>
+        <img class="logo" src="icons/icon-64.png" alt="" width="32" height="32" />
+        <h1>Send to qui</h1>
+      </header>
+
+      <form id="picker">
+        <p id="torrent-name" class="torrent-name"></p>
+        <label id="instance-row">
+          Instance
+          <select id="instanceId"></select>
+        </label>
+        <label>
+          Category
+          <select id="category"></select>
+        </label>
+        <label>
+          Tags
+          <input type="text" id="tags" list="tag-options" placeholder="Comma-separated" />
+          <datalist id="tag-options"></datalist>
+        </label>
+        <label>
+          When added
+          <select id="startState">
+            <option value="">Use qBittorrent's setting</option>
+            <option value="started">Start immediately</option>
+            <option value="paused">Add paused</option>
+          </select>
+        </label>
+        <div class="actions">
+          <button type="button" id="cancel" class="secondary">Cancel</button>
+          <button type="submit" id="send">Send</button>
+        </div>
+        <p id="status" class="status" role="status"></p>
+      </form>
+    </main>
+    <script type="module" src="picker.js"></script>
+  </body>
+</html>

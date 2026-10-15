@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Send to qui</title>
+    <link rel="icon" href="icons/icon-64.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <img class="logo" src="icons/icon-64.png" alt="" width="40" height="40" />
+        <h1>Send to qui</h1>
+      </header>
+
+      <section id="permission-banner" class="banner" hidden>
+        <p>
+          The extension needs access to all sites so it can reach qui and download torrent files
+          from trackers using your logins.
+        </p>
+        <button type="button" id="grant">Grant access</button>
+      </section>
+
+      <p id="managed-note" class="banner" hidden>
+        Some settings are provided by your system configuration and can't be changed here.
+      </p>
+
+      <form id="connection">
+        <h2>Connection</h2>
+        <label>
+          qui URL
+          <input type="url" id="baseUrl" placeholder="https://qui.example.com" required />
+          <small>Include the base path if qui runs under one, e.g. <code>https://example.com/qui</code>.</small>
+        </label>
+        <label>
+          API key
+          <input type="password" id="apiKey" autocomplete="off" required />
+          <small>Create one in qui under Settings → API Keys.</small>
+        </label>
+        <button type="submit">Connect</button>
+        <p id="connection-status" class="status" role="status"></p>
+        <p id="theme-status" class="status"></p>
+      </form>
+
+      <form id="defaults" hidden>
+        <h2>Defaults</h2>
+        <label>
+          Instance
+          <select id="instanceId"></select>
+        </label>
+        <label>
+          Category
+          <select id="category"></select>
+        </label>
+        <label>
+          Tags
+          <input type="text" id="tags" list="tag-options" placeholder="Comma-separated" />
+          <datalist id="tag-options"></datalist>
+        </label>
+        <label>
+          When added
+          <select id="startState">
+            <option value="">Use qBittorrent's setting</option>
+            <option value="started">Start immediately</option>
+            <option value="paused">Add paused</option>
+          </select>
+        </label>
+        <label>
+          .torrent downloads
+          <select id="downloadHandling">
+            <option value="file">Send the downloaded file to qui, then delete it</option>
+            <option value="refetch">Cancel the download and fetch the link again for qui</option>
+            <option value="off">Leave them alone</option>
+          </select>
+          <small id="helper-status"></small>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="askBeforeSending" />
+          Ask for the category, tags and start state before sending downloads and magnet links
+        </label>
+        <p id="allow-helper-row" hidden>
+          <button type="button" id="allow-helper">Allow talking to the helper</button>
+        </p>
+        <button type="submit">Save</button>
+        <p id="defaults-status" class="status" role="status"></p>
+      </form>
+    </main>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>
