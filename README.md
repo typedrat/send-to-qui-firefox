@@ -165,6 +165,14 @@ bun run lint        # web-ext lint on dist/
 `QUI_API_KEY` are set; it adds two paused test torrents to the first instance
 (or `QUI_INSTANCE_ID`).
 
+## CI
+
+The workflows in `.github/workflows` are generated from
+`dev/flake-module.nix` with
+[github-actions-nix](https://github.com/synapdeck/github-actions-nix). After
+changing them there, run `nix run .#write-files` and commit the result; CI fails
+when the two disagree.
+
 ## License
 
 GPL-2.0-or-later; see [LICENSE](LICENSE). The extension's icons and the rabbit
